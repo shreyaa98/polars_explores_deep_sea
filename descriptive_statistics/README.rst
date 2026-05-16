@@ -5,7 +5,7 @@ Descriptive Statistics
 Encounter with Penguins
 -----------------------
 
-.. figure:: penguin_parchment.png
+.. figure:: diving_penguins.png
 
 .. card::
    :shadow: lg

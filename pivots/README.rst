@@ -15,9 +15,7 @@ Pivot Tables
 
    Andromé joins the discussion: *"I think they have different patterns, maybe they are tattooed. Look, I made a drawing."*
  
-   .. figure:: penguin_heads.png
-
-   *Palmerpenguins Artwork by @allison_horst*
+.. figure:: penguin_parchment.png
 
    Finally, Aarla concludes: *"Tattoo or not, we should find out more about them. Our folks at home will want to know. How far are we with the measurements?"*
 
@@ -184,3 +182,8 @@ Challenge
    4. how long is the longest beak of each species?
    5. what is the mean of each numerical column, per species?
    6. what is the mean bill length and depth for each species/sex combination?
+
+.. note::
+
+   The whole penguin art is inspired by the original Palmer Penguin drawings by 
+   *@allison_horst*
