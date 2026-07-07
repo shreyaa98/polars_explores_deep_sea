@@ -7,17 +7,19 @@ Pivot Tables
 
    **Penguin Tribes**
 
-   The crew sits at the lunch table. Ilmar starts a conversation:
+   After calming down from their discovery of the legendary penguins, the crew of the polar submarine sits at the lunch table. Helmsman Ilmar starts a conversation:
    
-   *"Hey boss, I noticed something: those pingus, they are pretty much like us. They swim, they like cool water, they eat fish. They even have the same colors as Ming here. Just sayin'."*
+   *"Hey boss, I noticed something: those pingus, they are pretty much like us bears. They swim, they like cool water, they eat fish. They even has the same colors as Ming here. Just sayin'."*
    
-   *"Yeah but with a different pattern, "* Boreaboy chips in, *"most of their fur looks like us, but they have these funny paws."*.
+   The panda speculates: *"Yeah but some of them have completely different patterns. Maybe they are wearing tattoos, like you?"*
+   
+   Boreaboy, the carpenter, chips in: *"And then they have these funny paws... I wonder how they would ever use a phone."*
 
-   Andromé joins the discussion: *"I think they have different patterns, maybe they are tattooed. Look, I made a drawing."*
+   Andromé the navigator pulls out a parchment: *"Tattoo or not, we should find out more about them. Our folks at home will want to know what we found. Look, I made a drawing:"*
  
-.. figure:: penguin_parchment.png
+   .. figure:: penguin_parchment.png
 
-   Finally, Aarla concludes: *"Tattoo or not, we should find out more about them. Our folks at home will want to know. How far are we with the measurements?"*
+   Finally, captain Aarla concludes: *"We should come up with precise numbers. How far are we with the measurements?"*
 
    **Summarize the penguin data, considering the three different species.**
 
@@ -56,6 +58,11 @@ Let's examine one example: the mean bill length for each species:
       
 Here, each distinct value in ``index`` results in a separate row. The ``values`` parameter defines which column will be used for aggregation.
 
+To plot the aggregation, save it to a new variable ``g`` and plot it with the Altair library:
+
+.. code:: python
+
+   g.plot.bar(x="species", y="bill_length_mm").properties(width=400)
 
 Pivot Tables with rows and columns
 ----------------------------------
@@ -96,12 +103,10 @@ There are just a few aggregation functions that cover most statistical functions
 
 You could use your own functions with ``pl.pivot`` but this is out of scope for this tutorial.
 
-Normalizing
------------
+The Long Format
+---------------
 
-When creating pivot tables with count data, you often will want to know the **relative frequencies** or **percentage** of each item. This is an example of **normalizing data**.
-
-Assume we have the pivot:
+For some operations, you will need to convert pivot tables into the **long** format. Assume you have the pivot:
 
 .. code:: python3
 
@@ -112,53 +117,91 @@ Assume we have the pivot:
       aggregate_function="len"
    )
 
-You can normalize over the rows, so that the relative frequencies sum up to 1.0 for each island:
+then you can pile up the two gender columns into one:
 
 .. code:: python3
 
-   piv.with_columns(
-       pl.col("Male") / pl.sum_horizontal(pl.col("Male"), pl.col("Female")),
-       pl.col("Female") / pl.sum_horizontal(pl.col("Male"), pl.col("Female"))
+   long = piv.unpivot(
+      index="island",
+      on=["Male", "Female"],
+      variable_name="sex",
+      value_name="count"
    )
 
-If you want to normalize for each gender instead, you need to transpose the table first:
+
+Normalizing
+-----------
+
+When creating pivot tables with count data, you often will want to know the **relative frequencies** or **percentage** of each item. This is an example of **normalizing data**.
+
+Let's add a column for the relative frequency of each island per sex (Males sum up to 100%):
 
 .. code:: python3
 
-   piv.with_columns(
-       pl.col("Male") / pl.col("Male").sum(),
-       pl.col("Female") / pl.col("Female").sum()
+   long.with_columns((
+         pl.col("count") / pl.col("count").sum().over("sex")
+       ).alias("by_sex")
+   )
+
+Likewise, you can normalize so that the relative frequencies for each island add up to 1.0:
+
+.. code:: python3
+
+   long.with_columns((
+         pl.col("count") / pl.col("count").sum().over("island")
+       ).alias("by_island")
    )
 
 Finally, to normalize the entire table, so that everything adds up to 1.0, you need to divide by the **grand total**:
 
 .. code:: python3
 
-   # select columns to sum up explicitly
-   total = piv.select(pl.sum_horizontal(pl.col("Male"), pl.col("Female"))).sum().item()
-
-   # alternative: select numerical column s
-   total = piv.select(pl.col(pl.UInt32)).sum().sum_horizontal().item()
-
-   piv.with_columns(
-       pl.col("Male") / total,
-       pl.col("Female") / total
+   long.with_columns((
+         pl.col("count") / pl.col("count").sum()
+       ).alias("by_total")
    )
 
+Finally, if you store the normalized values, you can pivot back to a **wide table:**
+
+.. code:: python3
+
+   t.pivot(
+         values="by_total",
+         index="island",
+         on="sex",
+         aggregate_function="max"
+      )
 
 Bar Plots
 ---------
 
 One key feature of pivot tables is that they reduce the size of the data considerably.
-The pivoted data usually can be displayed well as a **bar plot**: 
+As a result, the pivoted data usually is much easier to plot. 
+You can create grouped bar chart from the **long format**:
 
 .. code:: python3
 
-   piv.plot.bar()
+   alt.Chart(long).mark_bar().encode(
+       x="island:N",
+       y="count:Q",
+       xOffset="sex:N",
+       color="sex:N"
+   ).properties(width=400)
 
 This works for all pivots and their normalizations!
 
 .. figure:: barplot.png
+
+Saving images
+-------------
+
+If you would like to save the Altair plots, you need to install another library:
+
+.. code::
+
+    pip install vl-convert-python
+
+Then add ``.save("myfile.png")`` to the plotting command (``.html`` and ``.svg``) work, too
 
 Challenge
 ---------
@@ -172,7 +215,8 @@ Challenge
 
       import seaborn as sns
 
-      df = sns.load_dataset('penguins')
+      df = pl.from_pandas(sns.load_dataset("penguins"))
+      df = df.drop_nulls()
 
    Answer the following questions:
 
