@@ -157,7 +157,24 @@ back to a ``for`` loop over all the rows.
        print(i, row['type'])
 
 
-.. figure:: extras.png
+Data Wrangling Commands
+=======================
+
+================================================================= ===================================================
+command                                                           description
+================================================================= ===================================================
+``df.sort("units", descending=True)``                             sort rows by units in descending order
+``df.sort(["type", "uuid"])``                                     sort rows by type and uuid 
+``df.with_columnns(pl.col("units").cast(pl.Int64))``              convert the units column to int
+``df.with_columnns(pl.col("crate_no").cast(pl.Float64))``         convert the crate_no column to float
+``df.with_columnns(pl.lit("unknown").alias("status"))``           create a new column with constant values
+``df.with_columnns((pl.col("units") * 2).alias("double_units"))`` create a new calculated colunmn
+``df.null_count()``                                               returns number of missing values in each column
+``df.drop_nulls("category")``                                     drop rows where category contains null values
+``df.with_columns(pl.col("category").fill_null("unknown"))``      fill missing values in 'category' column
+``df.with_columns(pl.col("units").fill_null(0))``                 fill missing values in 'units' column
+``df.transpose(include_header=True)``                             transpose DataFrame while keeping column names
+================================================================= ===================================================
 
 Challenge
 ---------
