@@ -5,6 +5,7 @@ A shipwreck
 -----------
 
 .. figure:: titanic.png
+   :width: 600
 
 .. card::
    :shadow: lg
@@ -153,7 +154,7 @@ Create a bar plot indicating the number of first, second and third class passeng
 - create a bar plot that shows the survived vs. dead passengers with one bar group for each gender
 - create a heatmap from the correlation matrix of all columns
 
-`.. seealso::
+.. seealso::
 
    For many years, the `Titanic Dataset Challenge <https://www.kaggle.com/datasets/yasserh/titanic-dataset>`__ was a kind of entry challenge for machine learning.
 
