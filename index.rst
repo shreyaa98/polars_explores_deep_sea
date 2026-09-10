@@ -36,6 +36,7 @@ Contents
    inspect_data_frames/README.rst
    select_rows_and_columns/README.rst
    data_wrangling/README.rst
+   data_cleaning/README.rst
    plotting/README.rst
    descriptive_statistics/README.rst
    pivots/README.rst
